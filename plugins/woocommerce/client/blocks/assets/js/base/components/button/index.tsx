@@ -18,6 +18,14 @@ type WCButtonProps = AriakitButtonProps & { children?: React.ReactNode };
 
 export interface ButtonProps extends WCButtonProps {
 	/**
+	 * Deprecated: Show a spinner. Preferably,
+	 * render a spinner in the button children
+	 * instead.
+	 *
+	 * @default false
+	 */
+	showSpinner?: boolean | undefined;
+	/**
 	 * Button variant
 	 *
 	 * @default 'contained'
@@ -46,8 +54,17 @@ interface LinkProps extends ButtonProps {
  */
 const Button = forwardRef< HTMLButtonElement, ButtonProps | LinkProps >(
 	( props, ref ) => {
+		if ( 'showSpinner' in props ) {
+			deprecated( 'showSpinner prop', {
+				version: '8.9.0',
+				alternative: 'Render a spinner in the button children instead.',
+				plugin: 'WooCommerce',
+			} );
+		}
+
 		const {
 			className,
+			showSpinner = false,
 			children,
 			variant = 'contained',
 			// To maintain backward compat we render a wrapper for button text by default,
@@ -60,7 +77,10 @@ const Button = forwardRef< HTMLButtonElement, ButtonProps | LinkProps >(
 			'wc-block-components-button',
 			'wp-element-button',
 			className,
-			variant
+			variant,
+			{
+				'wc-block-components-button--loading': showSpinner,
+			}
 		);
 
 		if ( 'href' in props ) {
@@ -71,9 +91,10 @@ const Button = forwardRef< HTMLButtonElement, ButtonProps | LinkProps >(
 							ref={ ref as ForwardedRef< HTMLAnchorElement > }
 							href={ props.href }
 						>
-							<div className="wc-block-components-button__text">
+							{ showSpinner && <Spinner /> }
+							<span className="wc-block-components-button__text">
 								{ children }
-							</div>
+							</span>
 						</a>
 					}
 					className={ buttonClassName }
@@ -85,9 +106,9 @@ const Button = forwardRef< HTMLButtonElement, ButtonProps | LinkProps >(
 		const buttonChildren = removeTextWrap ? (
 			props.children
 		) : (
-			<div className="wc-block-components-button__text">
+			<span className="wc-block-components-button__text">
 				{ props.children }
-			</div>
+			</span>
 		);
 
 		return (
@@ -96,6 +117,7 @@ const Button = forwardRef< HTMLButtonElement, ButtonProps | LinkProps >(
 				className={ buttonClassName }
 				{ ...rest }
 			>
+				{ showSpinner && <Spinner /> }
 				{ buttonChildren }
 			</AriakitButton>
 		);

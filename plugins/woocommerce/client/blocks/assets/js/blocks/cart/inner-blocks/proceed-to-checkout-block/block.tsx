@@ -12,7 +12,6 @@ import { cartStore, checkoutStore } from '@woocommerce/block-data';
 import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
 import { isErrorResponse } from '@woocommerce/types';
 import { useCartEventsContext } from '@woocommerce/base-context/providers';
-import { Spinner } from '@woocommerce/blocks-components';
 
 /**
  * Internal dependencies
@@ -25,16 +24,15 @@ import { defaultButtonLabel } from './constants';
 const Block = ( {
 	checkoutPageId,
 	className,
-	buttonLabel: buttonLabelProp,
+	buttonLabel,
 }: {
 	checkoutPageId: number;
 	className: string;
 	buttonLabel: string;
 } ): JSX.Element => {
 	const link = getSetting< string >( 'page-' + checkoutPageId, false );
-	const isCalculating = useSelect(
-		( select ) => select( checkoutStore ).isCalculating(),
-		[]
+	const isCalculating = useSelect( ( select ) =>
+		select( checkoutStore ).isCalculating()
 	);
 
 	const [ positionReferenceElement, positionRelativeToViewport ] =
@@ -64,11 +62,10 @@ const Block = ( {
 	}, [] );
 	const cart = useSelect( ( select ) => {
 		return select( cartStore ).getCartData();
-	}, [] );
-
+	} );
 	const label = applyCheckoutFilter< string >( {
 		filterName: 'proceedToCheckoutButtonLabel',
-		defaultValue: buttonLabelProp || defaultButtonLabel,
+		defaultValue: buttonLabel || defaultButtonLabel,
 		arg: { cart },
 	} );
 
@@ -80,25 +77,9 @@ const Block = ( {
 
 	const { dispatchOnProceedToCheckout } = useCartEventsContext();
 
-	const buttonLabel = (
-		<div
-			// Hide this from screen readers while showing the spinner. The text will not be removed from the
-			// DOM, it will just be hidden with CSS to maintain the button's size while the spinner appears.
-			aria-hidden={ showSpinner }
-			className={ clsx( 'wc-block-cart__submit-button__text', {
-				'wc-block-cart__submit-button__text--visually-hidden':
-					showSpinner,
-			} ) }
-		>
-			{ label }
-		</div>
-	);
-
 	const submitContainerContents = (
 		<Button
-			className={ clsx( 'wc-block-cart__submit-button', {
-				'wc-block-cart__submit-button--loading': showSpinner,
-			} ) }
+			className="wc-block-cart__submit-button"
 			href={ filteredLink }
 			disabled={ isCalculating }
 			onClick={ ( e ) => {
@@ -110,9 +91,9 @@ const Block = ( {
 					setShowSpinner( true );
 				} );
 			} }
+			showSpinner={ showSpinner }
 		>
-			{ showSpinner && <Spinner /> }
-			{ buttonLabel }
+			{ label }
 		</Button>
 	);
 
