@@ -257,6 +257,9 @@ class BlockPatterns {
 				$pattern['categories'] = array_map(
 					function ( $category ) {
 						foreach ( self::CATEGORIES_PREFIXES as $prefix ) {
+							if( empty( $category['title'] ) )
+							   continue;
+							
 							if ( strpos( $category['title'], $prefix ) !== false ) {
 								$parsed_category   = str_replace( $prefix, '', $category['title'] );
 								$parsed_category   = str_replace( '_', ' ', $parsed_category );
